@@ -1,0 +1,1578 @@
+React lifecycles (Class-based components ONLY)
+A component's lifecycle has three main phases: 
+	>> the Mounting Phase, 
+		- when a component is first created and inserted into the DOM
+	>> the Updating Phase, and 
+		- occurs when a component's state or props change. 
+	>> the Unmounting Phase.
+		- occurs when a component is removed from the DOM.
+
+https://www.w3schools.com/react/react_lifecycle.asp
+MOUNTING PHASE 
+	React has four built-in methods that gets called, in this order, when mounting a component:
+	>> constructor()
+	>> getDerivedStateFromProps()
+		- The getDerivedStateFromProps() method is called right before rendering the element(s) in the DOM.
+		- This is the natural place to set the state object based on the initial props.
+		- It takes state as an argument, and returns an object with changes to the state.
+	>> render()
+	>> componentDidMount()
+		- The componentDidMount() method is called AFTER the component is rendered.
+	The render() method is required and will always be called, the others are optional and will be called if you define them.
+
+Example:-	
+	class Header extends React.Component {
+	  constructor(props) {
+		super(props);		//<<=== this should be the first line in constructor ALWAYS !!!!
+		this.state = {favoritecolor: "red"};
+	  }
+	  
+	  // getDerivedStateFromProps
+	  static getDerivedStateFromProps(props, state) {
+		return {favoritecolor: props.favcol };
+	  }
+	  
+	  componentDidMount() {
+		setTimeout(() => {
+		  this.setState({favoritecolor: "yellow"})
+		}, 1000)
+	  }
+	  
+	  render() {
+		return (
+		  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+		);
+	  }
+	}
+
+	ReactDOM.render(<Header />, document.getElementById('root'));
+
+-------
+
+UPDATING PHASE 
+
+React has five built-in methods that gets called, in this order, when a component is updated:
+
+>> getDerivedStateFromProps()
+	- the first method that is called when a component gets updated.
+>> shouldComponentUpdate()
+	- you can return a Boolean value that specifies whether React should continue with the rendering or not.
+	- The default value is true.
+>> render()
+>> getSnapshotBeforeUpdate()
+	- If the getSnapshotBeforeUpdate() method is present, you should also include the componentDidUpdate() method, 
+		otherwise you will get an error.
+	- Use the getSnapshotBeforeUpdate() method to find out what the state object looked like before the update:
+>> componentDidUpdate()
+	- method is called AFTER the component is updated in the DOM.
+	
+The render() method is required and will always be called, the others are optional and will be called if you define them.
+
+Examples for above:-
+	 shouldComponentUpdate() {
+		return false;
+	  }
+	---
+	getSnapshotBeforeUpdate(prevProps, prevState) {
+		document.getElementById("div1").innerHTML =
+		"Before the update, the favorite was " + prevState.favoritecolor;
+	  }
+	  componentDidUpdate() {
+		document.getElementById("div2").innerHTML =
+		"The updated favorite is " + this.state.favoritecolor;
+	  }	
+	---
+	
+	componentDidMount() {
+		setTimeout(() => {
+		  this.setState({favoritecolor: "yellow"})
+		}, 1000)
+	  }
+	  componentDidUpdate() {
+		document.getElementById("mydiv").innerHTML =
+		"The updated favorite is " + this.state.favoritecolor;
+	  }
+	  
+----------
+
+UNMOUNTING PHASE 
+
+		componentWillUnmount()
+			- method is called when the component is about to be removed from the DOM.
+
+------------
+++++++++++++
+++++++++++++
+------------
+					
+React providers 
+
+
+React HOC 
+
+
+
+---
+
+https://www.youtube.com/watch?v=TNhaISOUy6Q
+
+React has 10 built in hooks and other than these u can BYO hooks (Build Your Own)
+Basic Hooks 
+	>> useState		===============> DONE.
+	>> useEffect	===============> DONE. ? IMP: its async (it doesnt block the JSX). JSX executes 1 time and then async updates the JSX.
+	>> useContext	===============> DONE. 
+
+Additional Hooks 
+	>> useReducer
+	>> useCallback
+	>> useMemo
+	>> useRef		===============> DONE. See Recap 
+	>> useImperativeHandle
+	>> useLayoutEffect	=========> exactly same as useEffect, but it is synchronous. JSX executes only once. It render-blocks	the JSX. bad practice?
+	>> useDebugValue
+	>> useTransition 
+		https://www.youtube.com/watch?v=1xjSQJWejZM
+		const [ isPending, startTransition ] = useTransition();  //  
+		startTransition(()=>{
+			setTab(tab); // which is a setter for useState. // it can wrap all state-changing methods, not just useState
+		});
+
+---
+
+Basic Hooks 
+	>> useState
+			https://stackblitz.com/edit/stackblitz-starters-dbyx41?file=src%2FApp.js
+			https://stackblitz-starters-dbyx41.stackblitz.io
+			
+	>> useEffect
+			https://stackblitz.com/edit/stackblitz-starters-kzrgzg?file=src%2FApp.js
+			https://stackblitz-starters-kzrgzg.stackblitz.io
+			
+	>> useContext
+
+Additional Hooks 
+	>> useReducer
+	>> useCallback
+	>> useMemo
+	>> useRef
+	>> useImperativeHandle	
+		==> Child can expose functionality to parent and parent can call it. 
+		==> used when "Lifting the state (from child) up to the parent comp" is simply not possible.
+			Lifting the state up (from child) -- (so that we can share it with other child comps) -- is how we r taught to think in react.
+			but sometimes, its just not possible. that when we use this hook.
+		==> forwardRef, Ref, useImperativeHandle	
+	>> useLayoutEffect
+	>> useDebugValue
+	
+---- 
+Current version 18
+----
+
+Stateful Logic = Data that changes in an application.
+In older react (react < 16.8), stateful logic used to reside in a class (with component lifecycles like ComponentDidMount(), ComponentDidUpdate(), ComponentWillUnmount, etc. ).
+	>> eg. class ButtonOld extends React.Component{  /// REMEMBER: This is the old way to do things.
+				constructor(props){
+					super(props);
+					this.state = {} /// some state that needs to be managed.
+				}
+			
+				render(){
+					return (
+							// some jsx 
+					)
+				}
+		   }
+
+Cons of this approach:
+	>> Extensive component tree, making debugging crazy. 
+	>> Extensive component tree also meant, sharing any logic, required frustrating jujitsu like Higher Order Components (HOCs) and render props.
+			- such cumbersome things like HOCs required to pass components, etc. seems anti-pattern, where in we look for similar behavior in other 
+				frameworks like Angular. 
+			- 
+			
+		
+----	
+
+Introducing Hooks :-
+	- allows lower level features outside of CONTEXT of a component. 
+	- removes reactivity from component. 
+	- Hooks are primitives or building blocks of react . 
+	- ONLY rule (for built in hooks) :-
+		IMP NOTE:- u should only call them at the top level of a component. Do not use it in loops, nested functions ,etc. see below the wrong ways.
+				   eg. function APP (){
+							useHook();  // this is correct.
+						
+							const fun = () => {
+								useHook(); // THIS IS WRONG !!!!
+							}
+							
+							return (
+								<button onclick={()=>useHook()} > click me </button> // THIS IS WRONG !!!!
+							)
+					   }
+					   
+	- For custom hooks, above rule does NOT apply. 
+	
+----
+
+	>> useState
+		import { useState } from 'react'; 	// CURLY braces very freaking important
+		
+		function App(){
+			const [count, setCount] = useState(0); // param 0 passed is initial state.	
+			
+					// count: reactive value, which we can use in jsx  
+					// setCount: setter 
+			
+			return (
+				<button onClick={ ()=>setCount(count+1) }>		// its onClick. remember C is capital.
+					clicked {count} times
+				</button>
+			);
+		}
+	
+----	
+	
+	>> useEffect
+	
+		function App(){
+			const [count, setCount] = useState(0); // param 0 passed is initial state.	
+			const [loaded, setLoaded] = useState(false);
+			
+			// Ex.1. Simple Alert
+			useEffect(()=>{
+				alert('alert side effect!!!');
+			})
+			
+			// Ex.2. Infinite loop GOTCHA 
+			// WRONG CODE.
+			useEffect(()=>{
+				fetch('some/api').then(()=>{ setLoaded(true) }) 		// WRONG CODE: infinite loop. 
+			});
+			
+			// WRONG CODE + CORRECT CODE. // https://stackblitz.com/edit/stackblitz-starters-kzrgzg?file=src%2FApp.js
+			const [fireApi, setFireApi] = useState(false);
+			  // 1. Execute only on comp. load. mimics ComponentDidMount
+			  useEffect(() => {
+				fetch('https://jsonplaceholder.typicode.com/todos/1').then(() => {
+				  console.log('aaaa');
+				});
+			  }, [fireApi]); 
+					// []: will execute twice, (because of strict mode in dev-mode)?. WRONG CODE.
+					// [fireApi]: will execute ONLY ONCE. CORRECT CODE.
+			
+			// CORRECT CODE
+			useEffect(()=>{
+				fetch('some/api').then(()=>{ setLoaded(true) }) 		// CORRECT CODE. 
+			},[count]);
+			
+			// where [] is an dependency array, 
+				// if its empty means no dependency. runs ONLY when component is initialized. mimics ComponentDidMount 
+				// if count changes and u want to run this effect, then use [count]. Then it will run on comp-init and comp-update
+											// This mimics ComponentDidMount ComponentDidUpdate
+				
+				
+			// Ex.3. Writing Teardown code.
+			useEffect(()=>{
+				alert('alert side effect!!!');
+				
+				return () => alert('teardowning:: goodbye!');	// This will get called before component is removed from UI.
+																// This mimics ComponentWillUnmount I think ?
+			})		
+				
+			return (
+				<button onclick={ ()=>setCount(count+1) }>
+					clicked {count} times
+				</button>
+			);
+		}
+		
+W3schools:- https://www.w3schools.com/react/react_useeffect.asp
+1. No dependency passed:
+	useEffect(() => {
+	  //Runs on every render
+	});
+	
+2. An empty array:
+	useEffect(() => {
+	  //Runs only on the first render
+	}, []);
+
+3. Props or state values:
+useEffect(() => {
+  //Runs on the first render
+  //And any time any dependency value changes
+}, [prop, state]);
+
+
+More W3schools thingies:-
+Here is an example of a useEffect Hook that is DEPENDENT on a variable. If the "count" variable updates, the effect will run again:
+	function Counter() {
+	  const [count, setCount] = useState(0);
+	  const [calculation, setCalculation] = useState(0);
+
+	  useEffect(() => {
+		setCalculation(() => count * 2);
+	  }, [count]); // <- add the count variable here
+
+	  return (
+		<>
+		  <p>Count: {count}</p>
+		  <button onClick={() => setCount((c) => c + 1)}>+</button>
+		  <p>Calculation: {calculation}</p>
+		</>
+	  );
+	}
+
+	const root = ReactDOM.createRoot(document.getElementById('root'));
+	root.render(<Counter />);
+	
+----
+
+IMP GOTCHA question for fetch-api :- ex. is here :-	https://stackblitz.com/edit/stackblitz-starters-vkuys8?file=src%2FApp.js
+
+   useEffect(() => {
+    // fetch('https://jsonplaceholder.typicode.com/todos/1').then(() => {
+    fetch('https://jsonplaceholder.typicode.com/todos/')	// <<=========== SENDS 199 objs in AOO
+      .then((res) => {	
+        return res.json();		// <<<<=========== use res.json() to get the promise handle; 
+								// remember its only a handle, if u need the data it in, u will have to chain it.
+								// "return" is VERY IMP !!!
+      })
+      .then((data) => {
+        console.log('data:', data);
+      });
+  }, [fireApi]);
+  // will execute twice, because of strict mode in dev-mode.
+
+----
+
+IMP GOTCHA for select dropdown using *.map in return()
+	>> in API call, data can come after render, so u could get null errors in ur html . 
+	
+	>> *.map(()=> {<option>...<option>})	// WRONG. {} not allowed around <option>
+	   *.map(()=> (<option>...<option>))	// CORRECT. () allowed around <option>
+	   *.map(()=> <option>...<option>)		// CORRECT. no () around <option> also works; seems for one-liners.
+	
+	>>  eg. https://stackblitz.com/edit/stackblitz-starters-vkuys8?file=src%2FApp.js 
+	Initial load of dropdown.
+		<select value={dropdownData}>
+        {reloadUi &&
+          dropdownData.map((x, index) => (
+            <option value={x.title}>{x.title}</option>
+          ))}
+      </select>
+	  
+	  Reference:- // https://stackblitz.com/edit/react-select-example?file=index.js
+				  // how to add a simple select.
+
+	>> default value selected after on load of dropdown.
+	
+	>> useEffect + 2 dropdowns (only on load) https://stackblitz.com/edit/stackblitz-starters-vv8gs4?file=src%2FApp.js
+	   useEffect + 1 dropdown (only on load) https://stackblitz.com/edit/stackblitz-starters-vkuys8?file=src%2FApp.js
+
+	   useEffect + 2 dropdowns + axios (only onload) https://stackblitz.com/edit/stackblitz-starters-inv1fd?file=src%2FApp.js,package.json 
+			Note: axios package 1.16.2 (and its dependencies) is known to cause runtime problems (atleast on stackblitz).
+				  so, instead use, lower version 
+				   "axios": "0.16.2",
+				   
+----
+
+IMP GOTCHA using axios .
+
+	Reference:
+		https://blog.logrocket.com/understanding-axios-get-requests/
+		https://blog.logrocket.com/understanding-axios-get-requests/#make-get-requests-axios 
+
+----
+	
+	>> useContext: allows u to share data THROUGHOUT component-tree WITHOUT passing props. 
+		>> In parent we use createContext() for creating wrapper providers
+		>> In child, we use useContext() to get the passed value. 
+		
+		Parent:
+		
+		const moods = {
+			happy: ' :) '
+			sad: ':('
+		}
+		
+		const MoodContext = createContext(moods); // Now we can use MoodContext.Provider across disconnected components.
+												  
+		function App(props){	// This can be many levels high in the component-tree
+			return (
+				<MoodContext.Provider value={moods.happy}>
+					<MoodsEmoji />
+				</MoodContext.Provider>
+			)
+		}
+		
+		function MoodsEmoji(){
+			const mood = useContext(MoodContext);	// consume value from nearest parent provider.
+			return (<p>{mood}</p>)
+		}
+		
+		// Older way using Consumer Component:-	// useContext is a cleaner replacement of Consumer Component.
+		function MoodsEmoji(){
+			return <MoodContext.Consumer>
+				{ ({mood}) => <p>{mood}</p> } 
+			</MoodContext.Consumer
+		}
+		
+---- 	
+
+		>> useRef
+			// does not trigger a re-render like useState
+			// keeps the same reference between renders 
+			// Common use case: Grab native html from the DOM/jsx 
+			
+			Ex.1. use it to update a variable that DOES NOT NEED TO BE RENDERED. It can keep values across multiple-renders too.
+				  use it to "remember" state between re-renders	
+
+			export default function somefunction() {
+			
+				const handleIncrement = () => {
+					const [count, setCount] = useState(0); // setCount(count + 1). count can be used in the render section 
+					const useRefCount = useRef(0);			
+					useRefCount.current++ // u CANNOT use *.current in the render-part cause useRef DOES NOT trigger re-render.
+				
+				}
+				
+				return (
+					...
+						<button onClick={handleIncrement}>Increment</button>
+					...
+				)
+				
+			}
+			
+			Ex.2. using an html ref.
+			
+			
+			export default function somefunction(){
+				const inputRef = useRef<HTMLInputElement | null>(null);
+				
+				useEffect(()=>{
+					inputRef.current?.focus();  // use the html ref to call methods on it directly. Now, when page loads, the textbox will be autohighlighted.
+				}, []);
+			
+			
+				return (
+					...
+						<input ref={inputRef} type = 'text' placeholder='Type Something...'/>
+					...
+				)
+			
+			}
+			
+			
+			
+
+----
+
+	>> useReducer	https://www.w3schools.com/react/react_usereducer.asp
+		Ex.1. Simple state update. Button ex. https://stackblitz.com/edit/stackblitz-starters-bgxukf?file=src%2FApp.js  
+		Ex.2. Nested State update. Dropdown ex. 
+		
+		// similar to setState but uses the redux pattern 
+		// The useReducer Hook accepts two arguments.
+			useReducer(<reducer>, <initialState>)
+			reducer::- function contains your custom state logic and 
+			initialState::- can be a simple value but generally will contain an object.
+			
+			
+		const [state, dispatch] = useReducer(reducer,0);
+		where 
+			state is the reactive-state and 
+			dispatch is a FUNCTION that can dispatch-an-action . It has 2 properties in the options-object called "action"
+																 1) action.type 2) action.payload 
+			reducer is a switch based function 
+			
+	>> 	eg.1.
+		import { useReducer } from "react";
+
+		const reducer = (state, action) => {
+		  switch (action.type) {
+			case "COMPLETE":
+			  return state.map((todo) => {
+				if (todo.id === action.id) {
+				  return { ...todo, complete: !todo.complete };
+				} else {
+				  return todo;
+				}
+			  });
+			default:
+			  return state;
+		  }
+		};	
+		
+	---
+
+		import { useReducer } from "react";
+		import ReactDOM from "react-dom/client";
+
+		const initialTodos = [
+		  {
+			id: 1,
+			title: "Todo 1",
+			complete: false,
+		  },
+		  {
+			id: 2,
+			title: "Todo 2",
+			complete: false,
+		  },
+		];
+
+		const reducer = (state, action) => {
+		  switch (action.type) {
+			case "COMPLETE":
+			  return state.map((todo) => {
+				if (todo.id === action.id) {
+				  return { ...todo, complete: !todo.complete };
+				} else {
+				  return todo;
+				}
+			  });
+			default:
+			  return state;
+		  }
+		};
+
+		function Todos() {
+		  const [todos, dispatch] = useReducer(reducer, initialTodos);
+
+		  const handleComplete = (todo) => {
+			dispatch({ type: "COMPLETE", id: todo.id });
+		  };
+
+		  return (
+			<>
+			  {todos.map((todo) => (
+				<div key={todo.id}>
+				  <label>
+					<input
+					  type="checkbox"
+					  checked={todo.complete}
+					  onChange={() => handleComplete(todo)}
+					/>
+					{todo.title}
+				  </label>
+				</div>
+			  ))}
+			</>
+		  );
+		}
+
+		const root = ReactDOM.createRoot(document.getElementById('root'));
+		root.render(<Todos />);	
+		
+		
+	
+----
+	
+	>> useCallback	
+		https://www.youtube.com/watch?v=MxIPQZ64x0I&t=1s 
+
+		VIMP: Functions/Function-defs are different on every render. 
+		 that means on each render function === function will not be same (will return fals); 
+		 since fucntion defs are not same, re-render will happen.
+
+		So we need to freeze the function-definition reference, each time the component is loaded.
+		useCallback helps us "freeze" the function-def 
+		
+		IF YOU DO NOT USE THIS properly, you will have bugs in your appplication, that you will not understand.
+		If you get bugs, check the dependencies array WITHOUT FAIL; else even data structures like arrays will be frozen in time, which is not what we want.
+		
+	>> useMemo
+
+	>> useImperativeHandle
+		>> Generally if a child component's state needs to reset from a parent comp, the state-related code "needs" to be moved to the parent comp.
+			But if you do so, then whats the need for the child comp to exist? The child comp becomes obsolete in this case. 
+			- "Lifiting state code up" -- this is bad coding
+			- sometimes, if ur child is using 3rd party libraries, "lifting state code upwards" is not even possible; as the libraries inner state 	 
+			  will not be accessible. 
+			
+			
+		Solution:- forwardRef + Ref + useImperativeHandle 
+			allow child comp (Counter) to accept a forwardRef.
+			
+			import { forwardRef, Ref, useImperativeHandle } from 'React';
+			+
+			function Counter(props: ..., ref: Ref<any>
+			+
+				useImperativeHandle(ref, () => ({}) ); 	// most basic style of calling it.
+				useImperativeHandle(ref, () => ({ reset, }) ); // where const reset = ... is a method to reset the count.
+				return (...);
+			+ 	
+			export default forwardRef (Counter); 
+	
+	>> useLayoutEffect
+	>> useDebugValue
+
+----
+
+
+===================================================
+
+udemy Next.js 
+
+next.js (my goals) 
+	- basic structure of app 
+	- samples/list-comp
+			 /register-comp (user registration app)
+			 
+---
+
+Next.js
+
+- React framework
+- file based routing 
+- provides api routes too: making it a FE + BE framework too. 
+- SEO seems amazing and google is not friendly to react-alone websites.
+
+- npx create-next-app@latest
+  npx create-next-app@latest --ts 
+	or 
+  yarn create next-app
+  yarn create next-app --typescript 
+  
+https://www.udemy.com/course/nextjs-react-the-complete-guide/learn/lecture/38137404#overview
+
+App Router: select No, as it does not support SERVER Actions like POST,PATCH,PUT
+			Instead use "Pages Router" 
+			
+---
+
+pages/index.js has all initial sample code for next js 
+
+---
+
+As mentioned in the previous lectures, code attachments are made available via Github.
+
+Unfortunately, downloading specific commits as ZIP files can lead to 404 errors - this seems to be a Github bug.
+
+If you're facing this issue, the easiest workaround is to use the Git CLI (get it here) to then clone the repository and check out the commit manually.
+
+Here's how that works:
+
+1) git clone https://github.com/mschwarzmueller/nextjs-course-code.git (requires Git CLI to be installed!)
+
+2) git branch -a => Lists all available branches => Choose the branch that fits the course section you're currently in
+
+3) git checkout <branch-name> => Check out the branch for the course section you're currently in (example: git checkout origin/10-prj-blog)
+
+4) git log => Lists all commits (code snapshots) for this branch
+
+5) git checkout <commit-id> => Checkout the specific commit
+
+This is less convenient than downloading ZIP files but it is a workaround that should work until Github fixed that issue.
+
+There also is a shortcut to checkout a specific attachment that might be linked to a lecture.
+
+For example, this lecture links to a specific commit: https://www.udemy.com/course/nextjs-react-the-complete-guide/learn/lecture/25146402#overview
+
+This is the Github link the lecture links to: https://github.com/mschwarzmueller/nextjs-course-code/tree/cab609415a42a19a29e702853ffb3ae23b64229e
+
+You can immediately see the commit id in the URL => cab609415a42a19a29e702853ffb3ae23b64229e in this case
+
+So you can get that code snapshot by running:
+
+1) git clone https://github.com/mschwarzmueller/nextjs-course-code.git
+
+2) git checkout cab609415a42a19a29e702853ffb3ae23b64229e
+
+----
+
+Attached to the last lecture of every course module, you find resources (code snapshots, slides) that belong to that module.
+
+In the previous lecture ("How To Get The Most Out Of This Course") I explain how to use these attachments.
+
+For this first course module, you find code snapshots and slides attached:
+
+Course Section Code: https://github.com/mschwarzmueller/nextjs-course-code/tree/01-getting-started
+
+Extra Files (e.g. Slides): https://github.com/mschwarzmueller/nextjs-course-code/tree/01-getting-started-extra-files
+
+---
+
+
+L33: Event props
+?? ==> props.onClick() is possible just like props.text 
+
+---
+
+L35: React Router 
+
+
+---
+
+My trials:-
+
+Stackblitz:
+1) App -> Todos (comp ) -> basic Modal.js (Comp)	https://stackblitz.com/edit/stackblitz-starters-pcxp3k?file=src%2FApp.tsx,src%2Fcomponents%2FTodos.js,src%2Fcomponents%2FModal.js,src%2Fcomponents%2FModal.css
+
+2) Forked above to make more versions of Modals.
+https://stackblitz.com/edit/stackblitz-starters-ctlzwv?file=src%2FApp.tsx,src%2Fcomponents%2FTodos.js,src%2Fcomponents%2FModal.js
+	>> Modal with cancel confirm 
+	>> Modal with custom button 
+	>> Material-UI based Modal
+
+---
+
+Next.js Udemy Max
+ >> move from code base routing to file based routing in next.js 			 
+		- static and dynamic routes 
+		- route to diff. pages. 
+ >> In next.js, no react-router and funny code like below
+	app.js (below code is junk in next.js)
+		<Switch>
+			<Route path="products:id">y
+				<ProductDetailsPage />
+			</Route>
+			<Route> 
+			...
+		</Switch>	
+		
+	In next.js (next.js will infer the routes from the folder structure)
+		/pages 
+			index.js, 	FQDN/
+			about.js 	FQDN/about
+			/products 
+				index.js,	FQDN/products  
+				[id].js ??  FQDN/products/1 (NOTE: yes the name of the file will be "[id].js"
+				
+				Q1: how can we do :id/:projectid ??
+					folder: [:id]
+					filename: [:projectid].js 
+					use router.query to get access to these in [:projectid].js 
+				Q2: how to read parent.params inside projectid-comp ?
+					use router.query to get access to multiple dynamic params. 
+				Q3: how to pass conditional data to each route ? like canActivate, etc. 
+				
+ >> import { useRouter } from 'next/router'; // used for functional components 
+		const router = useRouter();
+			// router.pathname, router.query 
+	import { useRouter, withRouter } from 'next/router'; // for class components, so that it comes in props
+				
+ >> Collect / Catch ALL routes: wtf is this ?
+	- diff url formats leading to the same component. 
+		[...ids.js] 
+		i.e. use the spread operator 
+	
+ >> Link-component (navigating programmatically) 
+	import Link from 'next/link';
+	
+	<Link href="/portfolio">Portfolio</Link> (use this to programmatically navigate without losing app-state).
+	
+	
+ >>     // "start": "react-scripts start",	
+
+-------------
++++++++++++++
+
+Learnings / Recap :-
+	1) Inline style :-
+			<... style={{width:'100%'}}  // justify-content becomes justifyContent (snakecase) and so on. 
+			-or- 
+			const someconst={width:'100%'};
+			<... style={someconst}
+
+	2) In stackblitz, your useEffect could fire twice().
+			Q. does removing <StrictMode></StrictMode> in app.js help ? 
+			A. Yes, looks like 
+			import { createRoot } from 'react-dom/client';
+			const root = createRoot(document.getElementById('app'));
+
+			root.render(
+			  <StrictMode> // <<=== remove this. 
+				<App />
+			  </StrictMode>
+			);
+	
+	3) On button click, fire useEffect, 
+		const [fireApi, setFireApi] = useState(false); // defaults to false.
+
+		  const clickHandler = () => {
+			if (!fireApi) setFireApi(true);
+			else {	// else seems import, plz check; if we put a counter here, then it will get reset everytime clickHandler is called. 
+			  setFireApi(false);
+			}
+		  };
+
+		  // 1. Execute only on comp. load. mimics ComponentDidMount	<<=== IMPORTANT!!!!
+		  useEffect(() => {
+			fetch('https://jsonplaceholder.typicode.com/todos/1').then(() => {
+			  console.log('aaaa');
+			});
+		  }, [fireApi]); // will execute twice, because of strict mode in dev-mode.
+
+		return(
+			...
+				      <button onClick={clickHandler}>Click Me</button>
+			...
+		)
+		
+	 4) 2 ways to write set* function of useState 
+		4.1) setFireApi(false); // prevValue is not accessible. 
+		4.2) setFireApi((prevValue)=> !prevValue); // using the function form, it remembers prev. value 
+				Using this in ex. 3, clickHandler method will now become 
+				  const clickHandler = () => {
+					setFireApi((prevValue) => !prevValue);
+				  };
+
+	 5) React-Router ex.  https://stackblitz.com/edit/stackblitz-starters-rkpvbr?file=src%2FApp.js 
+		In App.js 
+			export default function App() {
+			  return (
+				<BrowserRouter>
+				  <Routes>
+					<Route path="/" element={<Layout />}>		<<<===== Just the menu bar, onclick calls useNavigate from its *clickHandlersss
+					  <Route index element={<Home />} />		<<<===== Handles default landing page 
+
+					  <Route path="home" element={<Home />} />
+					  <Route path="pages/about" element={<About />} />
+					  <Route path="services" element={<Services />} />
+					  <Route path="governance" element={<Governance />} />
+					  <Route path="contactus" element={<Contactus />} />
+					  <Route path="organogram" element={<Organogram />} />
+					  {/* <Route path="contact" element={<Contact />} /> */}
+					  <Route path="*" element={<Nopage />} />	<<<=========== Handled non-existant routes 
+					</Route>
+				  </Routes>
+				</BrowserRouter>
+			  );
+			}
+
+	6) In above 5, can there be multiple <Route></Route> within <Routes></Routes>
+			Is below possible???? Plz do POC.
+				<Routes>
+					<Route></Route>
+					<Route></Route>
+					<Route></Route>
+				</Routes>
+	7) how to create routes with :userid ? or /:id/:userid?	Plz do POC.
+		& many more things in routes 
+		
+	11) Ex.2. using an html ref.
+			export default function somefunction(){
+				const inputRef = useRef<HTMLInputElement | null>(null);
+				
+				useEffect(()=>{
+					inputRef.current?.focus();  // use the html ref to call methods on it directly. Now, when page loads, the textbox will be autohighlighted.
+				}, []);
+						
+				return (
+					...
+						<input ref={inputRef} type = 'text' placeholder='Type Something...'/>
+					...
+				)
+			}
+			
+	12) 
+		>> useRef
+			// does not trigger a re-render like useState
+			// keeps the same reference between renders 
+			// Common use case: Grab native html from the DOM/jsx 
+			
+			Ex.1. use it to update a variable that DOES NOT NEED TO BE RENDERED. It can keep values across multiple-renders too.
+				  use it to "remember" state between re-renders	
+		
+	13)	.current property on the useref-var.	https://stackblitz.com/edit/stackblitz-starters-pyzyqt
+												https://dmitripavlutin.com/react-useref/
+			const count = useRef(0);
+			count.current++;
+		    console.log('count is: ', count);
+
+	14)	
+		
+	20)	
+		useContext: share data from comp2 to comp5, skipping comps3,4. (because that data is unwanted for comps 3,4)
+		
+		useState :-
+			// comp1 (Parent comp)  
+			const [user, setUser] = useState("Jesse Hall");
+			const UserContext = createContext();
+			return (
+				<UserContext.Provider value={user}>
+				  <h1>{`Hello ${user}!`}</h1>
+   			      <Component2 user={user} />	<<=== comp2, uses comp3, which uses comp4, which in turn calls comp5.
+				</UserContext.Provider>
+				);
+												  
+			//comp5
+			function Component5() {
+			const user = useContext(UserContext);		// so now we dont have to pass unwanted data to comp3,4
+
+	21) In parent :- createContext() + <var.PROVIDER> 
+	    In Child  :- useContext()
+		>> useContext: allows u to share data THROUGHOUT component-tree WITHOUT passing props. 
+		>> In parent we use createContext() for creating wrapper providers
+		>> In child, we use useContext() to get the passed value. 
+		
+	22) Another example of useContext: 
+		Parent:		
+		const moods = {
+			happy: ' :) '
+			sad: ':('
+		}
+		
+		const MoodContext = createContext(moods); // Now we can use MoodContext.Provider across disconnected components.
+												  
+		function App(props){	// This can be many levels high in the component-tree
+			return (
+				<MoodContext.Provider value={moods.happy}>
+					<MoodsEmoji />
+				</MoodContext.Provider>
+			)
+		}
+		
+		function MoodsEmoji(){
+			const mood = useContext(MoodContext);	// consume value from nearest parent provider.
+			return (<p>{mood}</p>)
+		}
+		
+		// Older way using Consumer Component:-	// useContext is a cleaner replacement of Consumer Component.
+		function MoodsEmoji(){
+			return <MoodContext.Consumer>
+				{ ({mood}) => <p>{mood}</p> } 
+			</MoodContext.Consumer
+		}
+
+-------------
++++++++++++++
+
+Redux Saga 
+	https://www.youtube.com/watch?v=JPvAMPkTrD8
+	https://github.com/monsterlessonsacademy/monsterlessonsacademy/tree/245-redux-saga
+	
+	
+	
++++++++++++++
+
+import { SfNav } from 'react-sf-building-blocks';
+import { Search } from 'react-bootstrap-icons';
+import {} from 'react-window'; // for displaying 1L rows in a list. 
+
++++++++++++++
+
+Static site trials:- (React)
+https://stackblitz.com/edit/stackblitz-starters-mppakh?file=src%2Flayout.js
+https://stackblitz.com/edit/stackblitz-starters-mppakh
+C:\Users\mr_jn\Downloads\Total Care - Static Website\WIP\stackblitz-starters-mppakh
+C:\Users\mr_jn\Downloads\Total Care - Static Website\WIP\totalcare
+npm run start 
+
+		Helper links:-
+		https://stackblitz.com/edit/react-material-ui-button?file=index.js
+		https://stackblitz.com/edit/react-material-ui-by-me?file=src%2FApp.js
+		
+		Cool Things ToDo:-
+		https://stackblitz.com/edit/materialui-tabs?file=tabs.js
+		
++++++++++
+
+Things to explore 
+
+>> Exploring a new component:- (written by someone else) 
+	- check if any state is being handled, if no state is there, then its mostly a dummy component. 
+	
+>> import { memo } from 'React';
+	export default memo (SearchComp);
+	
+>> VIMP: Functions are different on every render. 
+		 that means on each render function === 'function' will not be same; since fucntion defs are not same, re-render will happen.
+
+		So we need to freeze the function-definition reference, each time the component is loaded.
+		useCallback helps us "freeze" the function-def 
+		
+		IF YOU DO NOT USE THIS properly, you will have bugs in your appplication, that you will not understand.
+		If you get bugs, check the dependencies array WITHOUT FAIL; else even data structures like arrays will be frozen in time, which is not what we want.
+		
+>> 		
+		
+		
+	// it intercepts the render of the component.
+	
+++++++++++
+
+React Lazy 	
+https://www.youtube.com/watch?v=MJn4W7pR6RU
+
+const lazyAbout = React.lazy(()=>(import ('./components/About')) )
+// this will cause console errors for Suspense, so we need to wrap this in React.Suspense 
+
+<Route path = 'about' element={<React.Suspense fallback='loading...'><LazyAbout/></React.Suspense>} />	
+NOTE: fallback in React.Suspense can also take a component it seems. 
+
++++++++++++
+
+
+https://www.youtube.com/watch?v=TNhaISOUy6Q
+
+	React < 16.8 was class-based components leading to anti-pattern of "wrapper hell"
+	- Problem: passing components as arguments to other components. Called "Higher Order Components". 
+	- 
+	
+Custom hook
+		
+		function useDisplayName(){
+			const [displayName, setDisplayName] = useState(null);
+			useEffect(()=>{
+			...
+			}, []);
+			
+			useDebugValue(displayName ?? 'loading...'); // will display the name in the react-devtools.
+			
+			return displayName
+		}
+		
+	Interview: they asked, can we return the setter method also.
+				A. I think we can as is shown in this video: https://www.youtube.com/watch?v=BtImABK_VHo 
+				maybe something like below 
+				return { 
+					displayName,
+					firstName,
+					lastName,
+					myrender: some jsx ?
+				}
+				
++++++++++++
+useNavigate()
+useParams()
+	import { useParams } from "react-router-dom";
+	const { id } = useParams();
+	-or-
+	const params = new URLSearchParams(window.location.search) // id=123
+    let id = params.get('id') // 123 
+	
+	https://stackoverflow.com/questions/62426998/react-hooks-how-to-get-parameter-value-from-query-string
+	
+useLocation() // window.location.*
+useSignal() // better alternative than useState() bcoz useState is tied with re-rendering.
+
++++++++++++
+
+
+React testing library : beforeEach, beforeAll, afterEach(()=>{}), afterAll(),
+						Link should be wrapped within <BrowserRouter> (which is in react-dom);
+
+-OR-
+
+React Storybook + jest 
+
+++++++++++
+https://www.youtube.com/watch?v=7dTTFW7yACQ&list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
+
+@testing-library/jest-dom
+@testing-library/react
+@testing-library/user-event 
+
+component.test.js 
+
+import { render, screen } from '@testing-library/react';
+
+screen.findAllBy*() methods are there. 
+getBy*() methods
+	screen.getByText()
+	screen.getByRole()
+	screen.getByTitle()
+	screen.getByTestId()
+	
+		expect(someElement).toBeInTheDocument();
+		
+---
+Angular: jasmine + karma + TestBed. CreateFixtures + DebugElement (to get nativeElement)
+
+			describe("", ()=>{
+				beforeEach()
+				it("", ()=>{
+					expect(somevar).toBeTruthy();
+				})
+				
+			});	
+			
+---
+
+React: 	jest 
+
+	test()
+
+	it("", async()=>{
+		render(<Somecomp />);
+		const headingElement = screen.getByRole("heading", {name:"MyHeader"});
+		expect(headingElement).toBeInTheDocument();
+	})
+
++++++++++++++++++++++++
+
+Micro FE :-
+	- use module federation feature of webpack
+	- implement a shell application or "orchestrator" : to load and manage micro frontends. 
+	- 
+	
+	https://www.youtube.com/watch?v=-LMQKc4bVSk
+	webpack.config.js for Shell-Application
+		plugins:[htmlPlugin, new ModuleFederationPlugin({
+			name: "ShellApplication",	// or container or host-app or home or orchestrator or whatever u wanna call it 
+			filename: "remoteEntry.js",
+			remotes: {
+				MicroFrontend: "Micro-FE1@http://localhost:3001/remoteEntry.js"	// MicroFE-1 runs on a different port 3000, shelly runs on 3000.
+					// where the key "MicroFrontend" is the name of the app. 
+					// If name of MFE-1 was something else like "home, then above entry in remotes would become:
+					// home: "home@http://localhost:3001/remoteEntry.js"
+					
+					// IMP #3: LHS is derived from where??? IDK.
+			},
+			shared: ['faker']		// IMP#4: This is how shared libs are loaded.
+		})
+		]
+		
+	webpack.config.js for Micro-FE1 
+		plugins:[htmlPlugin, new ModuleFederationPlugin({
+			name: "Micro-FE1",				// IMP #2:- This name should match the RHS of shell application. ???
+			filename: "remoteEntry.js",
+			exposes: {
+			"./Button":"./src/Button"		// IMP #1:- LHS is an alias and it points to the actual path .???
+			},
+			shared: ['faker']		// IMP#4: This is how shared libs are loaded.
+			}),
+			new HtmlWebpackPlugin({				// this was from uDEMY, not from the npx cpmmand (we ran from seeing youtube).
+				template: './public/index.html'
+			})			
+		
+	]
+
+----
+
+More on Micro FE (youtube)
+
+	npx create-mf-app 
+	NOTE: remoteEntry.js is a manifest of all the exposed-modules. https://localhost:3000/remoteEntry.js 
+
+webpack config:-
+	properties under new ModuleFederationPlugin({
+		name:"" // try to keep simple names which have \w+ characters.
+		filename:"remoteEntry.js",
+		remotes:{},	// get components from somewhere. since it is empty it is not getting any comps from anywhere.
+		exposes:{
+			"./Header":"./src/Header.jsx", //componentName:path 
+			"./Footer":"./src/Footer.jsx",
+		},
+		shared : {
+		...deps,
+		react: {
+			singleton: true,
+			requiredVersion: deps.react
+			}
+		},
+		"react-dom": {
+			singleton: true,
+			requiredVersion: deps["react-dom"]
+			}
+		}
+	
+	})
+	
+----
+
+Summary:
+HOST:	npx create-mf-app	cd host/   npm install + npm start		8080 	react 	<Header />comp react-bootstrap
+		npx create-mf-app	cd host/   npm install + npm start		8081	react
+		npx create-mf-app	cd host/   npm install + npm start		8082	react 
+
+Description: 
+
+HOST:	npx create-mf-app	cd host/   npm install + npm start		8080 	react 	<Header />comp react-bootstrap
+		npm install react-bootstrap bootstrap
+		Menubar docking: https://github.com/alexkuz/react-dock/blob/master/src/Dock.js
+						 https://alexkuz.github.io/react-dock/demo/
+						 https://github.com/alexkuz/react-dock/blob/master/demo/src/App.jsx		
+		MUI 
+			npm install @mui/material @emotion/react @emotion/styled --save 
+			npm install @fontsource/roboto --save 
+			npm install @mui/icons-material
+				emotion vs styled-components: which one to use? styled comps are not compatible with server side rendered MUI.
+				
+			<meta name="viewport" content="initial-scale=1, width=device-width" />
+			To ensure proper rendering and touch zooming for all devices, add the responsive viewport meta tag to your <head> element:	
+
+			Material UI provides an optional CssBaseline component. (i think it may not work properly)
+
+			https://mui.com/material-ui/getting-started/example-projects/
+				has many sample projects, which IMHO look promising.
+							
+			GOTCHA#1 in Host App.jsx (DO NOT PUT THIS code in index.js. Index.js should just have import App statement, else it will error for eagerly consumption) :-
+			// old 
+			// ReactDOM.render(<App />, document.getElementById("app"));
+			// ReactDOM.createRoot
+			// new way: post 18+ 
+			import { createRoot } from 'react-dom/client';
+			const root = createRoot(document.getElementById('app'));
+			root.render(<App />);
+			
+			GOTCHA#2 i chose to have react-bootstrap also along with MUI. MUI has weird button classes.
+			
+
+npx create-mf-app	cd host/   npm install + npm start		8081	react
+npx create-mf-app	cd host/   npm install + npm start		8082	react 
+
+---
+udemy: ModuleFederationPlugin (read above examples before it)
+
+>> Shared modules/libs (Same versions) between applications.
+if(process.env.NODE_ENV === "development"){
+}
+
+
+	Error: Shared Module not available for eager consumption.
+	This may occur in the MFE app which is NOT using the shared-module/shared-lib .
+	Some crazy shit Stephen Grider is doing. Putting up code into a wrapper index.js and importing the whole bootstrap.js 
+
+>> Shared modules/libs (Different versions) between applications.
+	ModuleFederationPlugin will load different versions of faker. 
+	^5.0.0	+ ^5.1.0	===> Downloads only 1 faker.js, because the ^ implies major versions work well with sub versions.
+	^4.1.0  + ^5.1.0	===> Downloads 2 faker.js, the respective for the respective application. 
+	
+>> Singleton Loading:
+		>> Some libs can be loaded multiple times in the browser (eg.faker.js)
+		>> But some libs like react may croak and throw errors.
+		For this use:
+		shared: {
+			faker: {
+				singleton: true	
+			}
+		}
+		
+		// Singleton with ^4.1.0  + ^5.1.0, will show warnings in Console-tab.
+		// eg. "Unsatisfied version 5.1.0 of shared singleton module faker (required ^4.1.0) 
+		
+---
+
+sub-app execution context 
+
+
+----
+
+
+	
+++++++
+
+NOTE: any private keys like license keys etc. should be placed in your .npmrc file.
+
+++++++
+
+Middleware/Broker (React Saga)
+>> action dispatched -> Middleware/Broker (Saga/Thunk)	-> Redux reducer -> Store 
+https://www.youtube.com/watch?v=5yEG6GhoJBs
+
+State Management Library is Redux 
+- allows for global state (called Store in Redux)
+
+Store:- slices of state make a store.
+Actions:- type + payload 
+
+snippets:-
+
+	state/store.ts
+	
+	export const store = configureStore({
+		reducer:{}
+	})
+
+import { Provider } from 'react-redux' 
+	<Provider store={store}>
+		<App/>
+	</Provider>
+
+import { createSlice } from 'reduxjs/toolkit'; 
+
+
+++++++
+
+Material UI (MUI)
+- media queries: in building responsive web apps in CSS, media queries are used, but in MUI media queries are exposed out of the box using 
+	theme.breakpoints.*
+	
+	Below key can be, md, sm, lg, etc.
+	theme.breakpoints.up(key)
+	theme.breakpoints.down(key)
+	theme.breakpoints.only(key)
+	theme.breakpoints.not(key)
+	theme.breakpoints.between(start,end)
+	
+	import Box from "@mui/material/Box";
+	import Typography from "@mui/material/Typography";
+	import {styled} from "@mui/material/styles";
+
+Refs:-
+	https://www.youtube.com/watch?v=FB-sKY63AWo and google.
+
+++++++
+
+React PWA:
+	https://www.youtube.com/watch?v=bRoRikxgIew&list=PL8p2I9GklV46NFHdQMFBjXvxwVqtJpa2N
+	- make ur webapp behave like a native mobile app. (also called native app; mobile is implied).
+
+++++++
+
+React Cheatsheets:
+	https://www.freecodecamp.org/news/the-react-cheatsheet/#react-elements
+		>> Props can also be passed by placing data between the opening and closing tags of a component.
+			function App() {
+			  return (
+			   <User>
+				 <h1>Hello, John Doe!</h1>
+			   </User>
+			  );
+			}
+
+			function User({ children }) {		// IMP: Notice how "children" is inbuilt key being destructured. 
+			  return children; // Hello, John Doe!
+			}
+			
+		>>  {isAuthUser ? <AuthApp /> : <UnAuthApp />}	
+
+++++++
+
+React-Router cheatsheet (is this for class based components??)
+
+	https://devhints.io/react-router
+	<Route path='/'>
+	  <DefaultRoute handler={Home} />
+	  <NotFoundRoute handler={NotFound} />
+	  
+	  <Redirect from='login' to='sessions/new' />
+	  <Redirect from='login' to='sessions/new' params={{from: 'home'}} />
+	  <Redirect from='profile/:id' to='about-user' />
+
+	  <Route name='about-user' ... />
+	  
+	>> import { Navigation } from 'react-router'
+
+		React.createClass({
+		  mixins: [ Navigation ], ...
+		})
+
+		this
+		  .transitionTo('user', {id: 10})
+		  .transitionTo('/path')
+		  .transitionTo('http://...')
+		  .replaceWith('about')
+		  .makePath('about') // return URL
+		  .makeHref('about') // return URL
+		  .goBack()  
+
+++++++
+
+Design Patterns:-	
+
+	SOLID PRINCIPLES:-
+		- S is for Single Responsibility 
+		- O is for Open Closed 
+		- L is for Liskov Substitution
+		- I is for interface segregation 
+		- D is for Dependency Inversion 
+
+Anti Patterns:-
+https://www.youtube.com/watch?v=b0IZo2Aho9Y
+
+----
+
+Must know react libs:
+	// react-render-dom features, kendo ui for react, 
+	jwt-token,
+	React.Lazy + React.Suspense + fallback 
+	react-idle-timer,
+	react-hook-form, (yup or zod for form validations??)
+	react-intl 
+	react-bootstrap (provides accessibility) -OR- Material-UI(old) / MUI (new)
+	axios interceptors ?? https://upmostly.com/tutorials/set-up-axios-interceptors-in-your-reactjs-application
+	rxjs::BehaviorSubjects 
+	ContextAPI + Redux + Saga for state management 
+	Unit testing with jest. (jest is inbuilt in CRA, whereas jasmine is popular in angular)
+	end to end testing using cypress. 
+	SSR ?  https://www.digitalocean.com/community/tutorials/react-server-side-rendering
+	
+	More references for individual npm packages:-
+	https://dev.to/manindu/a-list-of-useful-npm-packages-for-react-developers-3dhg
+	
+	Questions:-
+	Q.1. SSR in MicroFE 
+	Q.2. Multi-tenancy in MicroFE 
+	
+---- 
+
+React forms https://www.youtube.com/watch?v=KejZXxFCe2k&list=PLC3y8-rFHvwjmgBr1327BA5bVXoQH-w5s
+For forms: react-hook-form vs Formik
+			- Formik is not maintained as of now; both work with react and react-native.
+			- react-hook-form works only with hooks-style of coding and not with class-component style of coding.
+			- so we will study react-hook-form and material ui. 
+			
+
+>> React Hook Form is a lib which helps with managing form data, submitting form data, validations, provide visual feedbacks
+>> Project creation
+	npm create vite@latest demo (React + Typescript)
+	cd into folder demo/
+	npm install 
+	npm run dev 
+	
+	-OR- 
+	
+	CRA (create-react-app)
+	npx create-react-app demo --template typescript
+	cd demo/
+	npm start 
+	
+	components/YouTubeform.js and use "rafc" snippet to write boilerplate code.
+	
+	npm install react-hook-form 
+	
+	import { useForm } from 'react-hook-form';
+	const form = useForm();	// form state has: values, errors, visited, isValid:Boolean 
+	
+	
+
+----
+MUI 
+ import icons path is very imp. eg.
+	import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+	<Button variant="contained" aria-label='Logout Button' startIcon={<ExitToAppIcon />}  >Logout</Button> 
+	startIcon means it will be before the label 
+	endIcon means it will be after the label
+
+---- 
+
+React Storybook
+	
+----
+
+Display large lists using React and Faker
+	Ref: https://blog.logrocket.com/render-large-lists-react-5-methods-examples/
+	Libs:
+	1) react-paginate	
+	2) react-infinite-scroller
+	3) react-virtualized
+	4) react-window
+		react-window is a set of components for efficiently rendering large lists in React. A complete rewrite of react-virtualized,
+	5) react-viewport-list
+		Like react-virtualized, React ViewPort List utilizes a technique called windowing, which renders only a portion of the list at a time, significantly reducing the time it takes to re-render components as well as the number of DOM nodes created.
+
+Draggable (React-Draggable)
+	1) https://react-grid-layout.github.io/react-draggable/example/ 
+	
++++++
+
+https://www.freecodecamp.org/news/use-firebase-authentication-in-a-react-app/
+Firebase supports a lot of ways for users to get authenticated. They include authentication through email addresses, third-party providers such as Twitter, Facebook, Github, Google, Microsoft, and much more.
+
+Before you set up and initialize the Firebase SDK for your React app, you'll need to sign up for Firebase using your Google account.
+
+
+Login into google.
+https://firebase.google.com/docs/auth Go here.
+Click "Go to console"
+Create project => enter project name => turn off analytics for now => create project. Finally you will come to below link:
+https://console.firebase.google.com/project/host-app-20e3e/overview
+It may ask you to add android/web/ etc. to ur project, but its not required. 
+From sidenav, select authentication and goto https://console.firebase.google.com/project/host-app-20e3e/authentication/providers  
+>> for now I have added only Email/Password and in future you can add more clicking "add providers" on RHS.
+>> Till now we are in sign-in method tab 
+>> switch to users tab and "add user" 
+https://console.firebase.google.com/project/host-app-20e3e/authentication/users
+I added joker@gotham.com/ki...
+		UID: PvgKEUOhqnfCA5GpcVpDRBjQxp32
+		
+IAM & Admin 
+	https://console.cloud.google.com/iam-admin/iam?authuser=0&project=host-app-20e3e&hl=en&pli=1		
+		
+		https://console.firebase.google.com/project/host-app-20e3e/settings/general/web:OWQ2Njc3NzMtZGYzNC00MGZjLTk4MmUtYWEwNThlZjRlYjY2
+		Project Name: host-dev 
+		Project ID: host-app-20e3e
+		Project Number: 581498731433
+		Web API Key: AIzaSyBu7jFkgHyRn4KJof--0Nhe_xDjsDHQf1M
+					
+		
+
+>> Now goto Project Overview https://console.firebase.google.com/project/host-app-20e3e/overview 
+>> 
+
+NOTE: Togoto firebase directly.
+https://console.firebase.google.com/project/host-app-20e3e/authentication/settings
+
+---
+Q. But how to create a component using above.
+https://www.youtube.com/watch?v=PKwu15ldZ7k	"firebase authentication react"
+	https://github.com/WebDevSimplified/React-Firebase-Auth
+signup, reset, etc.  
+signin 
+
+--- 
+
+HOC : Higher order components.
+
+https://stackoverflow.com/questions/38015224/is-it-possible-to-pass-a-react-component-as-argument-in-between-functions-of-a-c
+passing function components from parent to child.
+
+---
+
+MytestApp1 (App ID: 1:581498731433:web:da0d35576baf60c0b9a2b8)
+	>> Add Firebase to your web app
+		npm install firebase
+
+	>> Then, initialize Firebase and begin using the SDKs for the products you'd like to use.
+	
+			// Import the functions you need from the SDKs you need
+		import { initializeApp } from "firebase/app";
+		// TODO: Add SDKs for Firebase products that you want to use
+		// https://firebase.google.com/docs/web/setup#available-libraries
+
+		// Your web app's Firebase configuration
+		const firebaseConfig = {
+		  apiKey: "AIzaSyBu7jFkgHyRn4KJof--0Nhe_xDjsDHQf1M",
+		  authDomain: "host-app-20e3e.firebaseapp.com",
+		  projectId: "host-app-20e3e",
+		  storageBucket: "host-app-20e3e.appspot.com",
+		  messagingSenderId: "581498731433",
+		  appId: "1:581498731433:web:da0d35576baf60c0b9a2b8"
+		};
+
+		// Initialize Firebase
+		const app = initializeApp(firebaseConfig);
+		
+		Reference links:-
+			
+			Get Started
+			https://firebase.google.com/docs/web/setup?hl=en&authuser=0&_gl=1*fj30ae*_ga*ODI0NDA3MDM1LjE3MDMxMzU1MDI.*_ga_CW55HF8NVT*MTcwMzQ4NDQyNC4yLjEuMTcwMzQ4NDU5MC4zMC4wLjA.
+			
+			Web SDK API Reference 
+			https://firebase.google.com/docs/reference/js/?hl=en&authuser=0&_gl=1*fj30ae*_ga*ODI0NDA3MDM1LjE3MDMxMzU1MDI.*_ga_CW55HF8NVT*MTcwMzQ4NDQyNC4yLjEuMTcwMzQ4NDU5MC4zMC4wLjA.
+			
+			Samples 
+			https://firebase.google.com/docs/samples/?hl=en&authuser=0&_gl=1*n8nz70*_ga*ODI0NDA3MDM1LjE3MDMxMzU1MDI.*_ga_CW55HF8NVT*MTcwMzQ4NDQyNC4yLjEuMTcwMzQ4NDU5MC4zMC4wLjA.
+		
+	>> 	Choose a product to add to your app :
+			Authentication
+			Cloud Firestore 
+			Crashlytics 
+			Performance
+			Cloud Messaging 
+			A/B Testing 
+
+	>> Extensions 
+			Export collections to BigQuery 
+			Resize images 
+			Translate text
+			Sync with Mailchimp 
+			Shorten URLs 
+			Distributed counter  
+			
+++++
+
+
+
+
+
+
+
+
