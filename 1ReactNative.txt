@@ -1,0 +1,15 @@
+import { View, Text, Stylesheet, FlatList, Button, TouchableOpacity, Image } from 'react-native'
+
+>> FlatList	
+	- key has to be a string and NOT a number 
+
+>> expo is a react-native framework.
+codeSandbox seems to have online code 
+
+>> console.log will appear in the terminal running the "react native packager"
+
+>> props.navigation.navigate('SomeComp'); // programmatically change route on button click. 
+	props is automatically provided by "Stack Navigator" for us
+
+>> <Image /> is a self closing tag
+	+ imageSource = "require('../../assets/a.jpg')", where imageSource is a property which can be passed from parent to child. 
