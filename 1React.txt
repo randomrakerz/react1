@@ -128,7 +128,7 @@ Additional Hooks
 	>> useMemo
 	>> useRef		===============> DONE. See Recap 
 	>> useImperativeHandle
-	>> useLayoutEffect	=========> exactly same as useEffect, but it is synchronous. JSX executes only once. It render-blocks	the JSX. bad practice?
+	>> useLayoutEffect	=========> exactly same as useEffect, but it is synchronous. JSX executes only once. It render-blocks the JSX. bad practice?
 	>> useDebugValue
 	>> useTransition 
 		https://www.youtube.com/watch?v=1xjSQJWejZM
@@ -1007,6 +1007,19 @@ NOTE: fallback in React.Suspense can also take a component it seems.
 
 +++++++++++
 
+In your application, create a file named Protected.js and add the following code.
+
+import { Navigate } from "react-router-dom";
+const Protected = ({ isLoggedIn, children }) => {
+  if (!isLoggedIn) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+export default Protected;
+
++++++++++++
+
 
 https://www.youtube.com/watch?v=TNhaISOUy6Q
 
@@ -1569,10 +1582,100 @@ MytestApp1 (App ID: 1:581498731433:web:da0d35576baf60c0b9a2b8)
 			
 ++++
 
+============================
 
+React Hook Forms 
 
+https://www.youtube.com/watch?v=cc_xmawJ8Kg
+import { useForm } from 'react-hook-form';
+const { register } = useForm<FormFields>(); // note this requires a "type FormFields = {email:string, password:string } in TS.
 
+---
 
+const form = useForm()
+const {register,handleSubmit } = form;
+const {name, ref, onChange, onBlur } = register("username");
 
+---
 
+working ex.1.	https://stackblitz.com/edit/stackblitz-starters-hcb4ny?file=src%2FFormReactHooks.tsx
+import { useForm } from 'react-hook-form';
+
+export const FormReactHooks = () => {
+  const Form = useForm();
+  const { register, handleSubmit } = Form;
+
+  const someHandler = (data) => {
+    const ssn = data.ssn;
+    const ssn1 = ssn.substring(0, ssn.length - 4).replace(/\d/g, '*');
+    const ssn2 = ssn.substring(ssn.length - 4, ssn.length);
+    console.log('data is:: ', data);
+    console.log(ssn1, ssn2);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(someHandler)}>
+      <input type="text" id="ssn" name="ssn" {...register('ssn')} />
+      <input type="submit" />
+    </form>
+  );
+};
+
+---
+
+ex.2. Validations (on form submission)
+required, minLength + maxLength
+
+>> <form ... noValidate > This will prevent browser from validation n react-hook-form will take validations control over from the browser.
+>> <input type="text" id="ssn" name="ssn" {...register('ssn', { required: 'SSN is required' }) } />
+	This is a 2nd argument to the register function 
+	{ required: 'SSN is required' }
+	=OR= 
+	{ required: {
+		value: true, 
+		message: 'SSN is required'
+	} }
+
+>> {
+	pattern : {
+		value: //, 
+		message: 'Invalid email format'
+		}
+	}
+	
+	use this for email .
+	
+>> Errors to UI, use formState obj 
+	const { register, handleSubmit, formState } = form;
+	const { errors } = formState;
+	
+	After each input, lets add 
+	<p className="err">errors.ssn?.message</p>
+
+>> custom validation
+	1. validate:  (fieldValue) => {			// Add this comma separated after required in the options object.
+		return (
+				fieldValue !== "admin@example.com"
+			)
+		}
+		
+		// fieldValue will auto have the value of the email . this is custom validation.
+		
+	2. validate can also take an object (for more than 1 custom validations)
+	
+		validate: {
+			notAdmin: (fieldValue) => {
+				return (
+					fieldValue !== "admin@example.com" || "Admin is not allowed"
+				)
+			},
+			notBlackListed : (fieldValue) => {
+				return (
+					!fieldValue.endsWith("baddomain.com") || "This domain is not supported"
+				)
+			}
+		
+		}
+
+============================
 
