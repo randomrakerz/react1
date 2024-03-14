@@ -1676,6 +1676,146 @@ required, minLength + maxLength
 			}
 		
 		}
+		
+============================
+
+React slots RFC:-
+
+https://www.dhiwise.com/post/mastering-react-slot-patterns-for-flexible-ui-components
+	Component-Composition with React Slots Pattern. 
+
+	Basic Slot Pattern :-
+ex.1.	// uses inbuilt this.props.children
+	function Container({ children }) {
+		return <div className="container">{children}</div>;
+	}
+		
+	function App() {
+	  return (
+		<Container>
+		  <h1>Welcome to the Slot Pattern in React</h1>					<<=== Basic slots 
+		  <p>This is content passed into the container slot.</p>
+		</Container>
+	  );
+	}	
+
+ex.2. Named Slots for Complex Layouts
+
+	// uses this.props.title, this.props.content, this.props.actions 
+	function Card({ title, content, actions }) {
+	  return (
+		<div className="card">
+		  <div className="card-title">{title}</div>
+		  <div className="card-content">{content}</div>
+		  <div className="card-actions">{actions}</div>
+		</div>
+	  );
+	}
+	
+	function App() {
+	  return (
+		<Card
+		  title={<h2>Card Title</h2>}
+		  content={<p>This is some card content.</p>}
+		  actions={<button>Click Me</button>}
+		/>
+	  );
+	}
+	
+ex.3. Handling State and Events in Slotted Components
+
+	import React, { useState, createContext, useContext } from 'react';
+	const TabContext = createContext();		<<=== declared outside. 
+
+	function Tabs({ children }) {
+	  const [activeTab, setActiveTab] = useState(0);
+	  return (
+		<TabContext.Provider value={{ activeTab, setActiveTab }}>		<<==  imp. 
+		  <div className="tabs">{children}</div>
+		</TabContext.Provider>
+	  );
+	}	
+	
+	function Tab({ index, children }) {									<<== getting the passed value and later use it in setting local state. 
+	  const { activeTab, setActiveTab } = useContext(TabContext);
+	  const isActive = index === activeTab;
+	  const handleClick = () => setActiveTab(index);					<<== set local state. 
+
+	  return (
+		<div
+		  className={`tab ${isActive ? 'active' : ''}`}
+		  onClick={handleClick}
+		>
+		  {children}
+		</div>
+	  );
+	}
+	
+	function App() {
+	  return (
+		<Tabs>
+		  <Tab index={0}>Tab 1 Content</Tab>
+		  <Tab index={1}>Tab 2 Content</Tab>
+		  <Tab index={2}>Tab 3 Content</Tab>
+		</Tabs>
+	  );
+	}
+	
+ex.4. slotted components best practices 
+	- Use Prop Types or TypeScript
+	- Provide Default Content
+	- Avoid Unnecessary Wrappers: will help with css styling also. 
+
+ex.5. Here's an example of a well-structured slot component with "default content" and "prop validation":
+	import PropTypes from 'prop-types';
+	function Panel({ header, body, footer }) {
+	  return (
+		<div className="panel">
+		  <div className="panel-header">{header || <DefaultHeader />}</div>
+		  <div className="panel-body">{body || <DefaultBody />}</div>
+		  <div className="panel-footer">{footer || <DefaultFooter />}</div>
+		</div>
+	  );
+	}	
+	
+	Panel.propTypes = {
+	  header: PropTypes.node,
+	  body: PropTypes.node.isRequired,
+	  footer: PropTypes.node,
+	};
+
+	function DefaultHeader() {
+	  return <div>Default Header</div>;
+	}
+
+	function DefaultBody() {
+	  return <div>Default Body</div>;
+	}
+
+	function DefaultFooter() {
+	  return <div>Default Footer</div>;
+	}
 
 ============================
 
+React Architect Questions.
+1. Tictac Toe Logic:- 
+	body.background : #0f1B21;
+	
+	TicTacToe/TicTacToe.tsx 
+			  TicTacToe.css 
+			  
+	assets/X.png, O.png 		  
+	
+============================
+
+https://www.youtube.com/watch?v=bRoRikxgIew&list=PL8p2I9GklV46NFHdQMFBjXvxwVqtJpa2N
+
+React PWA tutorial	
+
+if ('serviceWorker' in navigator) {
+
+
+} else {
+	
+}
